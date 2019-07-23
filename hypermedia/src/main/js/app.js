@@ -12,22 +12,29 @@ class App extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {employees: [], attributes: [], pageSize: 2, links: {}};
+		this.state = { employees: [], attributes: [], pageSize: 2, links: {} };
 		this.updatePageSize = this.updatePageSize.bind(this);
 		this.onCreate = this.onCreate.bind(this);
 		this.onDelete = this.onDelete.bind(this);
 		this.onNavigate = this.onNavigate.bind(this);
 	}
 
+	// tag::follow-1[]
+	componentDidMount() {
+		this.loadFromServer(this.state.pageSize);
+	}
+	// end::follow-1[]
+
 	// tag::follow-2[]
 	loadFromServer(pageSize) {
-		follow(client, root, [
-			{rel: 'employees', params: {size: pageSize}}]
+		follow(
+			client, root,
+			[{ rel: 'employees', params: { size: pageSize } }]
 		).then(employeeCollection => {
 			return client({
 				method: 'GET',
 				path: employeeCollection.entity._links.profile.href,
-				headers: {'Accept': 'application/schema+json'}
+				headers: { 'Accept': 'application/schema+json' }
 			}).then(schema => {
 				this.schema = schema.entity;
 				return employeeCollection;
@@ -37,7 +44,8 @@ class App extends React.Component {
 				employees: employeeCollection.entity._embedded.employees,
 				attributes: Object.keys(this.schema.properties),
 				pageSize: pageSize,
-				links: employeeCollection.entity._links});
+				links: employeeCollection.entity._links
+			});
 		});
 	}
 	// end::follow-2[]
@@ -49,11 +57,13 @@ class App extends React.Component {
 				method: 'POST',
 				path: employeeCollection.entity._links.self.href,
 				entity: newEmployee,
-				headers: {'Content-Type': 'application/json'}
+				headers: { 'Content-Type': 'application/json' }
 			})
 		}).then(response => {
-			return follow(client, root, [
-				{rel: 'employees', params: {'size': this.state.pageSize}}]);
+			return follow(
+				client, root,
+				[{ rel: 'employees', params: { 'size': this.state.pageSize } }]
+			);
 		}).done(response => {
 			if (typeof response.entity._links.last !== "undefined") {
 				this.onNavigate(response.entity._links.last.href);
@@ -66,7 +76,7 @@ class App extends React.Component {
 
 	// tag::delete[]
 	onDelete(employee) {
-		client({method: 'DELETE', path: employee._links.self.href}).done(response => {
+		client({ method: 'DELETE', path: employee._links.self.href }).done(response => {
 			this.loadFromServer(this.state.pageSize);
 		});
 	}
@@ -74,7 +84,9 @@ class App extends React.Component {
 
 	// tag::navigate[]
 	onNavigate(navUri) {
-		client({method: 'GET', path: navUri}).done(employeeCollection => {
+		client({
+			method: 'GET', path: navUri
+		}).done(employeeCollection => {
 			this.setState({
 				employees: employeeCollection.entity._embedded.employees,
 				attributes: this.state.attributes,
@@ -93,22 +105,16 @@ class App extends React.Component {
 	}
 	// end::update-page-size[]
 
-	// tag::follow-1[]
-	componentDidMount() {
-		this.loadFromServer(this.state.pageSize);
-	}
-	// end::follow-1[]
-
 	render() {
 		return (
 			<div>
-				<CreateDialog attributes={this.state.attributes} onCreate={this.onCreate}/>
+				<CreateDialog attributes={this.state.attributes} onCreate={this.onCreate} />
 				<EmployeeList employees={this.state.employees}
-							  links={this.state.links}
-							  pageSize={this.state.pageSize}
-							  onNavigate={this.onNavigate}
-							  onDelete={this.onDelete}
-							  updatePageSize={this.updatePageSize}/>
+					links={this.state.links}
+					pageSize={this.state.pageSize}
+					onNavigate={this.onNavigate}
+					onDelete={this.onDelete}
+					updatePageSize={this.updatePageSize} />
 			</div>
 		)
 	}
@@ -142,7 +148,7 @@ class CreateDialog extends React.Component {
 	render() {
 		const inputs = this.props.attributes.map(attribute =>
 			<p key={attribute}>
-				<input type="text" placeholder={attribute} ref={attribute} className="field"/>
+				<input type="text" placeholder={attribute} ref={attribute} className="field" />
 			</p>
 		);
 
@@ -194,7 +200,7 @@ class EmployeeList extends React.Component {
 	// end::handle-page-size-updates[]
 
 	// tag::handle-nav[]
-	handleNavFirst(e){
+	handleNavFirst(e) {
 		e.preventDefault();
 		this.props.onNavigate(this.props.links.first.href);
 	}
@@ -218,7 +224,9 @@ class EmployeeList extends React.Component {
 	// tag::employee-list-render[]
 	render() {
 		const employees = this.props.employees.map(employee =>
-			<Employee key={employee._links.self.href} employee={employee} onDelete={this.props.onDelete}/>
+			<Employee key={employee._links.self.href}
+				employee={employee}
+				onDelete={this.props.onDelete} />
 		);
 
 		const navLinks = [];
@@ -237,7 +245,7 @@ class EmployeeList extends React.Component {
 
 		return (
 			<div>
-				<input ref="pageSize" defaultValue={this.props.pageSize} onInput={this.handleInput}/>
+				<input ref="pageSize" defaultValue={this.props.pageSize} onInput={this.handleInput} />
 				<table>
 					<tbody>
 						<tr>
@@ -285,7 +293,10 @@ class Employee extends React.Component {
 }
 // end::employee[]
 
+// tag::render[]
 ReactDOM.render(
 	<App />,
 	document.getElementById('react')
 )
+// end::render[]
+

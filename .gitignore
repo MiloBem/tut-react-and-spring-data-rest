@@ -1,4 +1,5 @@
 *.iml
+.hg
 .idea
 target
 bower_components

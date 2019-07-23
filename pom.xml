@@ -9,7 +9,20 @@
 		<version>2.1.4.RELEASE</version>
 		<relativePath/>
 	</parent>
-	
+
+	<profiles>
+		<profile>
+			<id>downloadSources</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<downloadSources>true</downloadSources>
+				<downloadJavadocs>true</downloadJavadocs>
+			</properties>
+		</profile>
+	</profiles>
+
 	<groupId>com.greglturnquist</groupId>
 	<artifactId>react-and-spring-data-rest</artifactId>
 	<version>0.0.1-SNAPSHOT</version>

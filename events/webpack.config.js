@@ -1,19 +1,19 @@
 var path = require('path');
 
 module.exports = {
-    entry: './src/main/js/app.js',
-    devtool: 'sourcemaps',
-    cache: true,
+	entry: './src/main/js/app.js',
+	devtool: 'sourcemaps',
+	cache: true,
 	mode: 'development',
-    resolve: {
-        alias: {
-            'stompjs': __dirname + '/node_modules' + '/stompjs/lib/stomp.js',
-        }
-    },
-    output: {
-        path: __dirname,
-        filename: './src/main/resources/static/built/bundle.js'
-    },
+	resolve: {
+		alias: {
+			'stompjs': __dirname + '/node_modules' + '/stompjs/lib/stomp.js',
+		}
+	},
+	output: {
+		path: __dirname,
+		filename: './src/main/resources/static/built/bundle.js'
+	},
 	module: {
 		rules: [
 			{

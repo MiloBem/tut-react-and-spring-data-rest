@@ -193,8 +193,7 @@ class EmployeeList extends React.Component {
 		if (/^[0-9]+$/.test(pageSize)) {
 			this.props.updatePageSize(pageSize);
 		} else {
-			ReactDOM.findDOMNode(this.refs.pageSize).value =
-				pageSize.substring(0, pageSize.length - 1);
+			ReactDOM.findDOMNode(this.refs.pageSize).value = pageSize.substring(0, pageSize.length - 1);
 		}
 	}
 	// end::handle-page-size-updates[]

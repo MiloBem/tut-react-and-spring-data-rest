@@ -21,9 +21,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
-import lombok.Data;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 
 /**
  * @author Greg Turnquist

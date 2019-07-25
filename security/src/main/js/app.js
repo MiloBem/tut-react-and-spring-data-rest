@@ -15,8 +15,14 @@ class App extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {employees: [], attributes: [], page: 1, pageSize: 2, links: {}
-		   , loggedInManager: this.props.loggedInManager};
+		this.state = {
+			employees: [],
+			attributes: [],
+			page: 1,
+			pageSize: 2,
+			links: {},
+			loggedInManager: this.props.loggedInManager
+		};
 		this.updatePageSize = this.updatePageSize.bind(this);
 		this.onCreate = this.onCreate.bind(this);
 		this.onUpdate = this.onUpdate.bind(this);
@@ -26,14 +32,25 @@ class App extends React.Component {
 		this.refreshAndGoToLastPage = this.refreshAndGoToLastPage.bind(this);
 	}
 
+	// tag::register-handlers[]
+	componentDidMount() {
+		this.loadFromServer(this.state.pageSize);
+		stompClient.register([
+			{ route: '/topic/newEmployee', callback: this.refreshAndGoToLastPage },
+			{ route: '/topic/updateEmployee', callback: this.refreshCurrentPage },
+			{ route: '/topic/deleteEmployee', callback: this.refreshCurrentPage }
+		]);
+	}
+	// end::register-handlers[]
+
 	loadFromServer(pageSize) {
 		follow(client, root, [
-				{rel: 'employees', params: {size: pageSize}}]
+			{ rel: 'employees', params: { size: pageSize } }]
 		).then(employeeCollection => {
 			return client({
 				method: 'GET',
 				path: employeeCollection.entity._links.profile.href,
-				headers: {'Accept': 'application/schema+json'}
+				headers: { 'Accept': 'application/schema+json' }
 			}).then(schema => {
 				// tag::json-schema-filter[]
 				/**
@@ -58,10 +75,10 @@ class App extends React.Component {
 		}).then(employeeCollection => {
 			this.page = employeeCollection.entity.page;
 			return employeeCollection.entity._embedded.employees.map(employee =>
-					client({
-						method: 'GET',
-						path: employee._links.self.href
-					})
+				client({
+					method: 'GET',
+					path: employee._links.self.href
+				})
 			);
 		}).then(employeePromises => {
 			return when.all(employeePromises);
@@ -83,7 +100,7 @@ class App extends React.Component {
 				method: 'POST',
 				path: response.entity._links.self.href,
 				entity: newEmployee,
-				headers: {'Content-Type': 'application/json'}
+				headers: { 'Content-Type': 'application/json' }
 			})
 		})
 	}
@@ -91,7 +108,7 @@ class App extends React.Component {
 
 	// tag::on-update[]
 	onUpdate(employee, updatedEmployee) {
-		if(employee.entity.manager.name === this.state.loggedInManager) {
+		if (employee.entity.manager.name === this.state.loggedInManager) {
 			updatedEmployee["manager"] = employee.entity.manager;
 			client({
 				method: 'PUT',
@@ -121,14 +138,14 @@ class App extends React.Component {
 
 	// tag::on-delete[]
 	onDelete(employee) {
-		client({method: 'DELETE', path: employee.entity._links.self.href}
-		).done(response => {/* let the websocket handle updating the UI */},
-		response => {
-			if (response.status.code === 403) {
-				alert('ACCESS DENIED: You are not authorized to delete ' +
-					employee.entity._links.self.href);
-			}
-		});
+		client({ method: 'DELETE', path: employee.entity._links.self.href }
+		).done(response => {/* let the websocket handle updating the UI */ },
+			response => {
+				if (response.status.code === 403) {
+					alert('ACCESS DENIED: You are not authorized to delete ' +
+						employee.entity._links.self.href);
+				}
+			});
 	}
 	// end::on-delete[]
 
@@ -141,10 +158,10 @@ class App extends React.Component {
 			this.page = employeeCollection.entity.page;
 
 			return employeeCollection.entity._embedded.employees.map(employee =>
-					client({
-						method: 'GET',
-						path: employee._links.self.href
-					})
+				client({
+					method: 'GET',
+					path: employee._links.self.href
+				})
 			);
 		}).then(employeePromises => {
 			return when.all(employeePromises);
@@ -169,7 +186,7 @@ class App extends React.Component {
 	refreshAndGoToLastPage(message) {
 		follow(client, root, [{
 			rel: 'employees',
-			params: {size: this.state.pageSize}
+			params: { size: this.state.pageSize }
 		}]).done(response => {
 			if (response.entity._links.last !== undefined) {
 				this.onNavigate(response.entity._links.last.href);
@@ -210,31 +227,20 @@ class App extends React.Component {
 	}
 	// end::websocket-handlers[]
 
-	// tag::register-handlers[]
-	componentDidMount() {
-		this.loadFromServer(this.state.pageSize);
-		stompClient.register([
-			{route: '/topic/newEmployee', callback: this.refreshAndGoToLastPage},
-			{route: '/topic/updateEmployee', callback: this.refreshCurrentPage},
-			{route: '/topic/deleteEmployee', callback: this.refreshCurrentPage}
-		]);
-	}
-	// end::register-handlers[]
-
 	render() {
 		return (
 			<div>
-				<CreateDialog attributes={this.state.attributes} onCreate={this.onCreate}/>
+				<CreateDialog attributes={this.state.attributes} onCreate={this.onCreate} />
 				<EmployeeList page={this.state.page}
-							  employees={this.state.employees}
-							  links={this.state.links}
-							  pageSize={this.state.pageSize}
-							  attributes={this.state.attributes}
-							  onNavigate={this.onNavigate}
-							  onUpdate={this.onUpdate}
-							  onDelete={this.onDelete}
-							  updatePageSize={this.updatePageSize}
-							  loggedInManager={this.state.loggedInManager}/>
+					employees={this.state.employees}
+					links={this.state.links}
+					pageSize={this.state.pageSize}
+					attributes={this.state.attributes}
+					onNavigate={this.onNavigate}
+					onUpdate={this.onUpdate}
+					onDelete={this.onDelete}
+					updatePageSize={this.updatePageSize}
+					loggedInManager={this.state.loggedInManager} />
 			</div>
 		)
 	}
@@ -263,7 +269,7 @@ class CreateDialog extends React.Component {
 	render() {
 		const inputs = this.props.attributes.map(attribute =>
 			<p key={attribute}>
-				<input type="text" placeholder={attribute} ref={attribute} className="field"/>
+				<input type="text" placeholder={attribute} ref={attribute} className="field" />
 			</p>
 		);
 		return (
@@ -308,8 +314,8 @@ class UpdateDialog extends React.Component {
 		const inputs = this.props.attributes.map(attribute =>
 			<p key={this.props.employee.entity[attribute]}>
 				<input type="text" placeholder={attribute}
-					   defaultValue={this.props.employee.entity[attribute]}
-					   ref={attribute} className="field"/>
+					defaultValue={this.props.employee.entity[attribute]}
+					ref={attribute} className="field" />
 			</p>
 		);
 
@@ -319,21 +325,21 @@ class UpdateDialog extends React.Component {
 
 		if (isManagerCorrect === false) {
 			return (
-					<div>
-						<a>Not Your Employee</a>
-					</div>
-				)
+				<div>
+					<a>Not Your Employee</a>
+				</div>
+			)
 		} else {
 			return (
 				<div>
 					<a href={"#" + dialogId}>Update</a>
-	
+
 					<div id={dialogId} className="modalDialog">
 						<div>
 							<a href="#" title="Close" className="close">X</a>
-	
+
 							<h2>Update an employee</h2>
-	
+
 							<form>
 								{inputs}
 								<button onClick={this.handleSubmit}>Update</button>
@@ -394,11 +400,11 @@ class EmployeeList extends React.Component {
 
 		const employees = this.props.employees.map(employee =>
 			<Employee key={employee.entity._links.self.href}
-					  employee={employee}
-					  attributes={this.props.attributes}
-					  onUpdate={this.props.onUpdate}
-					  onDelete={this.props.onDelete}
-					  loggedInManager={this.props.loggedInManager}/>
+				employee={employee}
+				attributes={this.props.attributes}
+				onUpdate={this.props.onUpdate}
+				onDelete={this.props.onDelete}
+				loggedInManager={this.props.loggedInManager} />
 		);
 
 		const navLinks = [];
@@ -418,7 +424,7 @@ class EmployeeList extends React.Component {
 		return (
 			<div>
 				{pageInfo}
-				<input ref="pageSize" defaultValue={this.props.pageSize} onInput={this.handleInput}/>
+				<input ref="pageSize" defaultValue={this.props.pageSize} onInput={this.handleInput} />
 				<table>
 					<tbody>
 						<tr>
@@ -461,9 +467,9 @@ class Employee extends React.Component {
 				<td>{this.props.employee.entity.manager.name}</td>
 				<td>
 					<UpdateDialog employee={this.props.employee}
-								  attributes={this.props.attributes}
-								  onUpdate={this.props.onUpdate}
-								  loggedInManager={this.props.loggedInManager}/>
+						attributes={this.props.attributes}
+						onUpdate={this.props.onUpdate}
+						loggedInManager={this.props.loggedInManager} />
 				</td>
 				<td>
 					<button onClick={this.handleDelete}>Delete</button>
@@ -475,7 +481,7 @@ class Employee extends React.Component {
 // end::employee[]
 
 ReactDOM.render(
-	<App loggedInManager={document.getElementById('managername').innerHTML } />,
+	<App loggedInManager={document.getElementById('managername').innerHTML} />,
 	document.getElementById('react')
 )
 

@@ -19,13 +19,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.ToString;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Greg Turnquist
@@ -50,10 +48,10 @@ public class Manager {
 		this.password = PASSWORD_ENCODER.encode(password);
 	}
 
-	protected Manager() {}
+	protected Manager() {
+	}
 
 	public Manager(String name, String password, String... roles) {
-
 		this.name = name;
 		this.setPassword(password);
 		this.roles = roles;

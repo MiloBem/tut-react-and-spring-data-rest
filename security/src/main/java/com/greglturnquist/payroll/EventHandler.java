@@ -15,8 +15,6 @@
  */
 package com.greglturnquist.payroll;
 
-import static com.greglturnquist.payroll.WebSocketConfiguration.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.HandleAfterDelete;
@@ -25,6 +23,8 @@ import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
+import static com.greglturnquist.payroll.WebSocketConfiguration.MESSAGE_PREFIX;
 
 /**
  * @author Greg Turnquist
@@ -46,20 +46,17 @@ public class EventHandler {
 
 	@HandleAfterCreate
 	public void newEmployee(Employee employee) {
-		this.websocket.convertAndSend(
-				MESSAGE_PREFIX + "/newEmployee", getPath(employee));
+		this.websocket.convertAndSend(MESSAGE_PREFIX + "/newEmployee", getPath(employee));
 	}
 
 	@HandleAfterDelete
 	public void deleteEmployee(Employee employee) {
-		this.websocket.convertAndSend(
-				MESSAGE_PREFIX + "/deleteEmployee", getPath(employee));
+		this.websocket.convertAndSend(MESSAGE_PREFIX + "/deleteEmployee", getPath(employee));
 	}
 
 	@HandleAfterSave
 	public void updateEmployee(Employee employee) {
-		this.websocket.convertAndSend(
-				MESSAGE_PREFIX + "/updateEmployee", getPath(employee));
+		this.websocket.convertAndSend(MESSAGE_PREFIX + "/updateEmployee", getPath(employee));
 	}
 
 	/**
@@ -68,8 +65,7 @@ public class EventHandler {
 	 * @param employee
 	 */
 	private String getPath(Employee employee) {
-		return this.entityLinks.linkForSingleResource(employee.getClass(),
-				employee.getId()).toUri().getPath();
+		return this.entityLinks.linkForSingleResource(employee.getClass(), employee.getId()).toUri().getPath();
 	}
 
 }
